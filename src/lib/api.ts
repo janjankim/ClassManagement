@@ -7,8 +7,8 @@ export const isRemoteConnected = Boolean(API_URL);
 
 async function callRemote<T>(body?: Record<string, unknown>): Promise<T> {
   const response = body
-    ? await fetch(API_URL as string, { method: "POST", body: JSON.stringify(body) })
-    : await fetch(`${API_URL}?action=bootstrap`);
+    ? await fetch(API_URL as string, { method: "POST", body: JSON.stringify(body), cache: "no-store" })
+    : await fetch(`${API_URL}?action=bootstrap`, { cache: "no-store" });
 
   if (!response.ok) throw new Error("서버 요청에 실패했습니다.");
   const payload = (await response.json()) as { ok: boolean; data?: T; error?: string };
