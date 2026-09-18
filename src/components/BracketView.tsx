@@ -1,0 +1,132 @@
+import { useMemo } from "react";
+import type { Match } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+interface BracketViewProps {
+  teams: string[];
+  matches: Match[];
+  selectedTeam: string | null;
+  onSelectTeam: (team: string | null) => void;
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+const SIZE = 340;
+const CENTER: Point = { x: SIZE / 2, y: SIZE / 2 };
+const RADIUS = 130;
+
+function nodePosition(index: number, total: number): Point {
+  const angle = -90 + (360 / total) * index;
+  const radians = (angle * Math.PI) / 180;
+  return {
+    x: CENTER.x + RADIUS * Math.cos(radians),
+    y: CENTER.y + RADIUS * Math.sin(radians),
+  };
+}
+
+export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: BracketViewProps) {
+  const positions = useMemo(
+    () => Object.fromEntries(teams.map((team, index) => [team, nodePosition(index, teams.length)])),
+    [teams],
+  );
+
+  const edges = useMemo(() => {
+    const pairs: { a: string; b: string; matches: Match[] }[] = [];
+    for (let i = 0; i < teams.length; i += 1) {
+      for (let j = i + 1; j < teams.length; j += 1) {
+        const teamA = teams[i];
+        const teamB = teams[j];
+        const pairMatches = matches.filter(
+          (match) => (match.a === teamA && match.b === teamB) || (match.a === teamB && match.b === teamA),
+        );
+        if (pairMatches.length > 0) pairs.push({ a: teamA, b: teamB, matches: pairMatches });
+      }
+    }
+    return pairs;
+  }, [teams, matches]);
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full max-w-[420px]" role="img" aria-label="대진도">
+        {edges.map(({ a, b, matches: pairMatches }) => {
+          const start = positions[a];
+          const end = positions[b];
+          if (!start || !end) return null;
+          const hasCompleted = pairMatches.some((match) => match.status === "completed");
+          const dimmed = selectedTeam && selectedTeam !== a && selectedTeam !== b;
+          const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+
+          return (
+            <g key={`${a}-${b}`} opacity={dimmed ? 0.25 : 1}>
+              <line
+                x1={start.x}
+                y1={start.y}
+                x2={end.x}
+                y2={end.y}
+                stroke={hasCompleted ? "var(--color-brand-500)" : "#cbd5e1"}
+                strokeWidth={hasCompleted ? 3 : 2}
+                strokeDasharray={hasCompleted ? undefined : "6 5"}
+              />
+              {hasCompleted ? (
+                <circle
+                  cx={mid.x}
+                  cy={mid.y}
+                  r={5}
+                  fill="var(--color-brand-600)"
+                  className="cursor-pointer"
+                  onClick={() => onSelectTeam(selectedTeam === a ? null : a)}
+                >
+                  <title>{`${a} vs ${b}`}</title>
+                </circle>
+              ) : null}
+            </g>
+          );
+        })}
+
+        {teams.map((team) => {
+          const pos = positions[team];
+          const isSelected = selectedTeam === team;
+          return (
+            <g
+              key={team}
+              className="cursor-pointer"
+              onClick={() => onSelectTeam(isSelected ? null : team)}
+            >
+              <circle
+                cx={pos.x}
+                cy={pos.y}
+                r={28}
+                fill={isSelected ? "var(--color-brand-600)" : "#ffffff"}
+                stroke="var(--color-brand-500)"
+                strokeWidth={2}
+              />
+              <text
+                x={pos.x}
+                y={pos.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className={cn("select-none text-sm font-bold", isSelected ? "fill-white" : "fill-brand-800")}
+              >
+                {team}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      {selectedTeam ? (
+        <button
+          type="button"
+          onClick={() => onSelectTeam(null)}
+          className="text-xs font-semibold text-brand-600 underline"
+        >
+          {selectedTeam} 선택 해제
+        </button>
+      ) : (
+        <p className="text-xs text-slate-400">반 또는 파란 점을 눌러 해당 경기만 볼 수 있어요.</p>
+      )}
+    </div>
+  );
+}

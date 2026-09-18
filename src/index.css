@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eef5fb;
+  --color-brand-100: #d7e8f5;
+  --color-brand-200: #b0d1eb;
+  --color-brand-300: #7fb3dc;
+  --color-brand-400: #4f92c9;
+  --color-brand-500: #2f6fa5;
+  --color-brand-600: #245a89;
+  --color-brand-700: #1c4770;
+  --color-brand-800: #163b66;
+  --color-brand-900: #102a49;
+}
+
+body {
+  background-color: #f7fafc;
+  color: #10233b;
+  font-family:
+    "Pretendard Variable",
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
+}
