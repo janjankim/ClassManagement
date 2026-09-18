@@ -69,8 +69,16 @@ function seedSampleMatches() {
 }
 
 function doGet(e) {
+  const action = e && e.parameter && e.parameter.action;
+
+  if (!action) {
+    return HtmlService.createHtmlOutputFromFile("Index")
+      .setTitle("2026 배구 대회 경기 현황")
+      .addMetaTag("viewport", "width=device-width, initial-scale=1")
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
   try {
-    const action = (e && e.parameter && e.parameter.action) || "bootstrap";
     if (action !== "bootstrap") throw new Error("지원하지 않는 조회 요청입니다.");
     return json_({ ok: true, data: getBootstrapData_() });
   } catch (error) {

@@ -226,7 +226,7 @@
 
 - **React + TypeScript**
 - **Vite**: 빠른 개발 서버와 빌드
-- **React Router**: 학생용 시각화, 경기 표, 관리자 화면 라우팅
+- **React Router(HashRouter)**: 학생용 시각화, 경기 표, 순위, 관리자 화면 라우팅. Apps Script가 단일 URL(`/exec`)로만 화면을 서빙하므로 서버 라우팅 없이 동작하는 해시 라우팅(`/exec#/table`)을 사용
 - **TanStack Query**: 경기 데이터 조회·저장·갱신 관리
 - **shadcn/ui**: 버튼, 입력창, 표, 다이얼로그 등 공통 UI
 - **Tailwind CSS**: shadcn/ui 기반 레이아웃과 반응형 스타일
@@ -253,13 +253,11 @@
 
 ### 15.3 백엔드
 
-- **Google Apps Script(GAS)**: 웹 API 및 서버 로직
-- **Apps Script Web App**: 프론트엔드에서 호출하는 API 엔드포인트
-- 주요 API:
-  - `GET`: 경기 목록·팀 목록 조회
-  - `POST`: 경기 추가
-  - `PUT`: 경기 수정
-  - `DELETE`: 경기 삭제
+- **Google Apps Script(GAS)**: API 서버이자 프론트엔드 호스팅을 겸함
+- **Apps Script Web App**: `doGet`/`doPost` 하나로 화면과 API를 모두 처리
+  - `doGet` (파라미터 없음): 빌드된 React 앱(단일 HTML)을 `HtmlService`로 반환 — 학생·관리자가 접속하는 화면
+  - `doGet?action=bootstrap`: 경기 목록·팀 목록·대회 설정 조회
+  - `doPost`: `action` 값에 따라 로그인, 경기 추가·수정·삭제 처리
 - 관리자 인증:
   - 관리자 비밀번호는 Apps Script의 **Script Properties**에 저장
   - 비밀번호 검증은 Apps Script에서 처리
@@ -305,22 +303,23 @@
 
 ### 15.5 배포
 
-- **Vercel**: React 프론트엔드 배포
-- **Google Apps Script Web App**: 백엔드 API 배포
-- **Google Drive / Google Sheets**: 데이터 저장
-- **GitHub**: 소스 코드 및 Vercel 배포 연동
-- 프론트엔드 환경변수:
-  - `VITE_GAS_API_URL`: Apps Script Web App URL
+별도의 프론트엔드 호스팅 없이 **Google Apps Script Web App 하나로 화면과 API를 모두 배포**한다.
+
+- **빌드**: Vite + `vite-plugin-singlefile`로 React 앱을 JS/CSS까지 인라인된 단일 HTML 파일로 빌드 (Apps Script는 여러 정적 파일을 서빙할 수 없어 한 파일로 합침)
+- **배포 절차**: 빌드 산출물을 Apps Script 프로젝트의 HTML 파일(`Index.html`)로 복사 → `clasp push`로 코드 업로드 → `clasp deploy -i <고정 배포 ID>`로 기존 배포를 새 버전으로 갱신 (배포 ID를 고정해 URL이 매번 바뀌지 않도록 함)
+- **Google Sheets**: 데이터 저장
+- **GitHub**: 소스 코드 버전 관리(선택 사항, 배포 자체에는 필요하지 않음)
 - 관리자 비밀번호와 시트 ID 등 민감한 값은 Apps Script의 Script Properties에 저장
+- 프론트엔드가 자기 자신을 호출하므로 API URL은 배포된 `/exec` 주소와 동일 — 빌드 시 `VITE_GAS_API_URL`로 고정해 번들에 포함
 
 배포 구조:
 
 ```text
 학생/관리자 브라우저
         ↓
-Vercel에 배포된 React 웹앱
-        ↓
-Google Apps Script Web App API
+Google Apps Script Web App (/exec)
+   ├─ 화면 요청(action 파라미터 없음) → 빌드된 React 앱(HTML)
+   └─ API 요청(action=bootstrap 등)  → JSON 데이터
         ↓
 Google Sheets
 ```
@@ -329,35 +328,35 @@ Google Sheets
 
 | 영역 | 기술 |
 |---|---|
-| 프론트엔드 | React + TypeScript + Vite |
-| 화면 전환·데이터 상태 | React Router + TanStack Query |
-| 대진 시각화 | SVG 또는 React Flow |
-| 디자인 | Figma + shadcn/ui + Tailwind CSS |
-| 백엔드 | Google Apps Script Web App |
+| 프론트엔드 | React + TypeScript + Vite (단일 HTML로 빌드) |
+| 화면 전환·데이터 상태 | React Router(HashRouter) + TanStack Query |
+| 대진 시각화 | SVG |
+| 디자인 | Tailwind CSS |
+| 백엔드 · 화면 호스팅 | Google Apps Script Web App (하나로 통합) |
 | 데이터베이스 | Google Sheets |
-| 배포 | Vercel + Google Apps Script |
-| 소스 관리 | GitHub |
+| 배포 | `clasp push` + `clasp deploy` (Apps Script 단독) |
+| 소스 관리 | GitHub (선택) |
 
 ### 15.7 단계별 적용
 
 #### 1단계: 프로토타입
 
 - React + TypeScript + Vite
-- 샘플 데이터를 JSON 또는 로컬 상태로 사용
-- 시각화 화면·표 화면·관리자 화면 구현
+- 샘플 데이터를 로컬 메모리 상태로 사용 (`VITE_GAS_API_URL` 미설정 시 자동 적용)
+- 시각화 화면·표 화면·순위 화면·관리자 화면 구현
 
 #### 2단계: 실제 데이터 연결
 
 - Google Sheets 문서 및 시트 구성
-- Apps Script API 구현
+- Apps Script API 구현 (`doGet`/`doPost`)
 - 관리자 인증 적용
 - 경기 추가·수정·삭제 구현
 - 학생 화면 읽기 전용 정책 적용
 
 #### 3단계: 배포 및 운영
 
-- GitHub와 Vercel 연결
-- Apps Script Web App 배포 및 접근 권한 설정
-- Vercel에 Apps Script API URL 환경변수 설정
+- Vite 빌드를 단일 HTML로 합쳐(`vite-plugin-singlefile`) Apps Script `Index.html`로 반영
+- `doGet`에서 API 요청과 화면 요청을 분기 처리
+- `clasp push` + `clasp deploy -i <배포 ID>`로 화면·API를 한 번에 배포 (`npm run deploy:gas`)
 - 모바일·게시용 화면 테스트
 - 관리자 비밀번호 변경 또는 정식 인증 방식 적용
