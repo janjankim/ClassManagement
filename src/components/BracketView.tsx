@@ -42,7 +42,7 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
         const pairMatches = matches.filter(
           (match) => (match.a === teamA && match.b === teamB) || (match.a === teamB && match.b === teamA),
         );
-        if (pairMatches.length > 0) pairs.push({ a: teamA, b: teamB, matches: pairMatches });
+        pairs.push({ a: teamA, b: teamB, matches: pairMatches });
       }
     }
     return pairs;
@@ -56,13 +56,15 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
           const end = positions[b];
           if (!start || !end) return null;
           const completedMatch = pairMatches.find((match) => match.status === "completed");
-          const dimmed = selectedTeam && selectedTeam !== a && selectedTeam !== b;
+          const involvesSelected = selectedTeam !== null && (selectedTeam === a || selectedTeam === b);
+          const dimmed = selectedTeam !== null && !involvesSelected;
+          const showLabel = completedMatch && involvesSelected;
           const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
 
           const dx = mid.x - CENTER.x;
           const dy = mid.y - CENTER.y;
           const dist = Math.hypot(dx, dy) || 1;
-          const labelRadius = 84;
+          const labelRadius = 88;
           const label = {
             x: CENTER.x + (dx / dist) * labelRadius,
             y: CENTER.y + (dy / dist) * labelRadius,
@@ -79,21 +81,12 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
                 strokeWidth={completedMatch ? 3 : 2}
                 strokeDasharray={completedMatch ? undefined : "6 5"}
               />
-              {completedMatch ? (
+              {showLabel ? (
                 <g
                   className="cursor-pointer"
                   onClick={() => onSelectTeam(selectedTeam === a ? null : a)}
                 >
-                  <rect
-                    x={label.x - 23}
-                    y={label.y - 16}
-                    width={46}
-                    height={32}
-                    rx={9}
-                    fill="white"
-                    stroke="var(--color-brand-400)"
-                    strokeWidth={1.5}
-                  />
+                  <rect x={label.x - 23} y={label.y - 16} width={46} height={32} rx={9} fill="white" />
                   <text
                     x={label.x}
                     y={label.y - 4}
@@ -155,7 +148,7 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
           {selectedTeam} 선택 해제
         </button>
       ) : (
-        <p className="text-xs text-slate-400">반 또는 점수 카드를 눌러 해당 경기만 볼 수 있어요.</p>
+        <p className="text-xs text-slate-400">반을 눌러 해당 경기 결과를 볼 수 있어요.</p>
       )}
     </div>
   );
