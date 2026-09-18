@@ -55,9 +55,18 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
           const start = positions[a];
           const end = positions[b];
           if (!start || !end) return null;
-          const hasCompleted = pairMatches.some((match) => match.status === "completed");
+          const completedMatch = pairMatches.find((match) => match.status === "completed");
           const dimmed = selectedTeam && selectedTeam !== a && selectedTeam !== b;
           const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
+
+          const dx = mid.x - CENTER.x;
+          const dy = mid.y - CENTER.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          const labelRadius = 84;
+          const label = {
+            x: CENTER.x + (dx / dist) * labelRadius,
+            y: CENTER.y + (dy / dist) * labelRadius,
+          };
 
           return (
             <g key={`${a}-${b}`} opacity={dimmed ? 0.25 : 1}>
@@ -66,21 +75,42 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
                 y1={start.y}
                 x2={end.x}
                 y2={end.y}
-                stroke={hasCompleted ? "var(--color-brand-500)" : "#cbd5e1"}
-                strokeWidth={hasCompleted ? 3 : 2}
-                strokeDasharray={hasCompleted ? undefined : "6 5"}
+                stroke={completedMatch ? "var(--color-brand-500)" : "#cbd5e1"}
+                strokeWidth={completedMatch ? 3 : 2}
+                strokeDasharray={completedMatch ? undefined : "6 5"}
               />
-              {hasCompleted ? (
-                <circle
-                  cx={mid.x}
-                  cy={mid.y}
-                  r={5}
-                  fill="var(--color-brand-600)"
+              {completedMatch ? (
+                <g
                   className="cursor-pointer"
                   onClick={() => onSelectTeam(selectedTeam === a ? null : a)}
                 >
-                  <title>{`${a} vs ${b}`}</title>
-                </circle>
+                  <rect
+                    x={label.x - 23}
+                    y={label.y - 16}
+                    width={46}
+                    height={32}
+                    rx={9}
+                    fill="white"
+                    stroke="var(--color-brand-400)"
+                    strokeWidth={1.5}
+                  />
+                  <text
+                    x={label.x}
+                    y={label.y - 4}
+                    textAnchor="middle"
+                    className="select-none fill-brand-900 text-[11px] font-extrabold"
+                  >
+                    {completedMatch.scoreA}:{completedMatch.scoreB}
+                  </text>
+                  <text
+                    x={label.x}
+                    y={label.y + 10}
+                    textAnchor="middle"
+                    className="select-none fill-brand-600 text-[9px] font-bold"
+                  >
+                    {completedMatch.winner || "동점"}
+                  </text>
+                </g>
               ) : null}
             </g>
           );
@@ -125,7 +155,7 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
           {selectedTeam} 선택 해제
         </button>
       ) : (
-        <p className="text-xs text-slate-400">반 또는 파란 점을 눌러 해당 경기만 볼 수 있어요.</p>
+        <p className="text-xs text-slate-400">반 또는 점수 카드를 눌러 해당 경기만 볼 수 있어요.</p>
       )}
     </div>
   );
