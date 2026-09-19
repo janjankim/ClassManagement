@@ -110,7 +110,7 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
                     x={label.x}
                     y={label.y + 10}
                     textAnchor="middle"
-                    className="select-none fill-brand-600 text-[9px] font-bold"
+                    className="select-none fill-amber-500 text-[10px] font-extrabold"
                   >
                     {completedMatch.winner || "동점"}
                   </text>
