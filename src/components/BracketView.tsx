@@ -75,7 +75,7 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
             perpX = -perpX;
             perpY = -perpY;
           }
-          const labelOffset = 20;
+          const labelOffset = 32;
           const label = {
             x: mid.x + perpX * labelOffset,
             y: mid.y + perpY * labelOffset,
