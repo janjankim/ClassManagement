@@ -61,13 +61,24 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
           const showLabel = completedMatch && involvesSelected;
           const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
 
-          const dx = mid.x - CENTER.x;
-          const dy = mid.y - CENTER.y;
-          const dist = Math.hypot(dx, dy) || 1;
-          const labelRadius = 88;
+          // Offset the label perpendicular to the line (not along it) so it never
+          // sits on top of the stroke, and push it toward the outside of the
+          // pentagon so it doesn't drift onto an unrelated crossing diagonal.
+          const lineDx = end.x - start.x;
+          const lineDy = end.y - start.y;
+          const lineLength = Math.hypot(lineDx, lineDy) || 1;
+          let perpX = -lineDy / lineLength;
+          let perpY = lineDx / lineLength;
+          const outwardX = mid.x - CENTER.x;
+          const outwardY = mid.y - CENTER.y;
+          if (perpX * outwardX + perpY * outwardY < 0) {
+            perpX = -perpX;
+            perpY = -perpY;
+          }
+          const labelOffset = 20;
           const label = {
-            x: CENTER.x + (dx / dist) * labelRadius,
-            y: CENTER.y + (dy / dist) * labelRadius,
+            x: mid.x + perpX * labelOffset,
+            y: mid.y + perpY * labelOffset,
           };
 
           return (
