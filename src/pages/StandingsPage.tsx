@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { AppHeader } from "@/components/AppHeader";
+import { HeadToHeadMark } from "@/components/HeadToHeadMark";
 import { NavTabs } from "@/components/NavTabs";
 import { useBootstrap } from "@/hooks/useBootstrap";
 import { computeStandings } from "@/lib/standings";
@@ -22,9 +23,9 @@ export function StandingsPage() {
 
       {!isLoading && !isError ? (
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full min-w-[520px] text-sm">
+          <table className="w-full min-w-[520px] text-center text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-brand-800 text-left text-white">
+              <tr className="border-b border-slate-200 bg-brand-800 text-white">
                 <th className="px-4 py-3 font-semibold">순위</th>
                 <th className="px-4 py-3 font-semibold">반</th>
                 <th className="px-4 py-3 font-semibold">경기</th>
@@ -49,14 +50,22 @@ export function StandingsPage() {
                   <td className="px-4 py-3 text-slate-600">{entry.wins}</td>
                   <td className="px-4 py-3 text-slate-600">{entry.draws}</td>
                   <td className="px-4 py-3 text-slate-600">{entry.losses}</td>
-                  <td className="px-4 py-3 font-semibold text-slate-800">{entry.setPoints}</td>
+                  <td className="px-4 py-3 font-semibold text-slate-800">
+                    <span className="relative inline-block">
+                      {entry.setPoints}
+                      {entry.headToHead ? <HeadToHeadMark team={entry.team} entries={entry.headToHead} /> : null}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <p className="px-4 py-3 text-xs text-slate-400">
-            순위 기준: 승 수 → 세트 득점 순. 세트를 이기면 1점이며, 세트를 져도 감점은 없습니다(경기당 최대 3점).
-          </p>
+          <div className="space-y-1 px-4 py-3 text-xs text-slate-400">
+            <p>순위 기준: 승 수 → 세트 득점 → 승자승 순. 세트를 이기면 1점이며, 세트를 져도 감점은 없습니다(경기당 최대 3점).</p>
+            <p>
+              <span className="font-extrabold text-amber-500">*</span> 승 수와 세트 득점이 같아 승자승으로 순위를 정한 반이에요. 표시에 마우스를 올리면 결과를 볼 수 있어요.
+            </p>
+          </div>
         </div>
       ) : null}
     </div>
