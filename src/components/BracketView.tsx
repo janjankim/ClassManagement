@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Button } from "@/components/ui/Button";
 import type { Match } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -7,6 +8,8 @@ interface BracketViewProps {
   matches: Match[];
   selectedTeam: string | null;
   onSelectTeam: (team: string | null) => void;
+  showAll: boolean;
+  onToggleAll: () => void;
 }
 
 interface Point {
@@ -27,14 +30,14 @@ function nodePosition(index: number, total: number): Point {
   };
 }
 
-export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: BracketViewProps) {
+export function BracketView({ teams, matches, selectedTeam, onSelectTeam, showAll, onToggleAll }: BracketViewProps) {
   const positions = useMemo(
     () => Object.fromEntries(teams.map((team, index) => [team, nodePosition(index, teams.length)])),
     [teams],
   );
 
   const edges = useMemo(() => {
-    const pairs: { a: string; b: string; matches: Match[] }[] = [];
+    const pairs: { a: string; b: string; adjacent: boolean; matches: Match[] }[] = [];
     for (let i = 0; i < teams.length; i += 1) {
       for (let j = i + 1; j < teams.length; j += 1) {
         const teamA = teams[i];
@@ -42,7 +45,8 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
         const pairMatches = matches.filter(
           (match) => (match.a === teamA && match.b === teamB) || (match.a === teamB && match.b === teamA),
         );
-        pairs.push({ a: teamA, b: teamB, matches: pairMatches });
+        const adjacent = j - i === 1 || j - i === teams.length - 1;
+        pairs.push({ a: teamA, b: teamB, adjacent, matches: pairMatches });
       }
     }
     return pairs;
@@ -51,14 +55,14 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
   return (
     <div className="flex flex-col items-center gap-2">
       <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full max-w-[420px]" role="img" aria-label="대진도">
-        {edges.map(({ a, b, matches: pairMatches }) => {
+        {edges.map(({ a, b, adjacent, matches: pairMatches }) => {
           const start = positions[a];
           const end = positions[b];
           if (!start || !end) return null;
           const completedMatch = pairMatches.find((match) => match.status === "completed");
           const involvesSelected = selectedTeam !== null && (selectedTeam === a || selectedTeam === b);
           const dimmed = selectedTeam !== null && !involvesSelected;
-          const showLabel = completedMatch && involvesSelected;
+          const showLabel = completedMatch && (showAll || involvesSelected);
           const mid = { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 };
 
           // Offset the label perpendicular to the line (not along it) so it never
@@ -76,10 +80,22 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
             perpY = -perpY;
           }
           const labelOffset = 32;
-          const label = {
-            x: mid.x + perpX * labelOffset,
-            y: mid.y + perpY * labelOffset,
-          };
+
+          // With every result visible, the diagonals form a pentagram and any
+          // label beside a diagonal lands on a crossing line. The middle of each
+          // diagonal is the one stretch with no crossings, so a small label sits
+          // right on the line there instead.
+          const onLine = showAll && !adjacent;
+          const boxWidth = onLine ? 38 : 46;
+          const boxHeight = onLine ? 26 : 32;
+          const label = onLine
+            ? mid
+            : {
+                x: mid.x + perpX * labelOffset,
+                y: mid.y + perpY * labelOffset,
+              };
+          const scoreY = onLine ? -3 : -4;
+          const winnerY = onLine ? 9 : 10;
 
           return (
             <g key={`${a}-${b}`} opacity={dimmed ? 0.25 : 1}>
@@ -97,10 +113,17 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
                   className="cursor-pointer"
                   onClick={() => onSelectTeam(selectedTeam === a ? null : a)}
                 >
-                  <rect x={label.x - 23} y={label.y - 16} width={46} height={32} rx={9} fill="white" />
+                  <rect
+                    x={label.x - boxWidth / 2}
+                    y={label.y - boxHeight / 2}
+                    width={boxWidth}
+                    height={boxHeight}
+                    rx={9}
+                    fill="white"
+                  />
                   <text
                     x={label.x}
-                    y={label.y - 4}
+                    y={label.y + scoreY}
                     textAnchor="middle"
                     className="select-none fill-brand-900 text-[11px] font-extrabold"
                   >
@@ -108,7 +131,7 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
                   </text>
                   <text
                     x={label.x}
-                    y={label.y + 10}
+                    y={label.y + winnerY}
                     textAnchor="middle"
                     className="select-none fill-amber-500 text-[10px] font-extrabold"
                   >
@@ -158,9 +181,20 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam }: Brac
         >
           {selectedTeam} 선택 해제
         </button>
+      ) : showAll ? (
+        <p className="text-xs text-slate-400">완료된 모든 경기 결과를 보고 있어요.</p>
       ) : (
         <p className="text-xs text-slate-400">반을 눌러 해당 경기 결과를 볼 수 있어요.</p>
       )}
+      <Button
+        type="button"
+        variant={showAll ? "primary" : "secondary"}
+        aria-pressed={showAll}
+        onClick={onToggleAll}
+        className="mt-1"
+      >
+        {showAll ? "전체 결과 숨기기" : "전체 경기 결과 보기"}
+      </Button>
     </div>
   );
 }

@@ -8,6 +8,17 @@ import { useBootstrap } from "@/hooks/useBootstrap";
 export function VisualizationPage() {
   const { data, isLoading, isError } = useBootstrap();
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+
+  function handleSelectTeam(team: string | null) {
+    setShowAll(false);
+    setSelectedTeam(team);
+  }
+
+  function handleToggleAll() {
+    setSelectedTeam(null);
+    setShowAll((prev) => !prev);
+  }
 
   const matches = data?.matches ?? [];
   const teams = data?.teams ?? [];
@@ -35,7 +46,9 @@ export function VisualizationPage() {
               teams={teams}
               matches={matches}
               selectedTeam={selectedTeam}
-              onSelectTeam={setSelectedTeam}
+              onSelectTeam={handleSelectTeam}
+              showAll={showAll}
+              onToggleAll={handleToggleAll}
             />
           </div>
 
