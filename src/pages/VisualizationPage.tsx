@@ -8,10 +8,10 @@ import { useBootstrap } from "@/hooks/useBootstrap";
 export function VisualizationPage() {
   const { data, isLoading, isError } = useBootstrap();
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(true);
 
   function handleSelectTeam(team: string | null) {
-    setShowAll(false);
+    setShowAll(team === null);
     setSelectedTeam(team);
   }
 
