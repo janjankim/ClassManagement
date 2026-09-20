@@ -181,11 +181,7 @@ export function BracketView({ teams, matches, selectedTeam, onSelectTeam, showAl
         >
           {selectedTeam} 선택 해제
         </button>
-      ) : showAll ? (
-        <p className="text-xs text-slate-400">완료된 모든 경기 결과예요. 반을 누르면 그 반의 경기만 볼 수 있어요.</p>
-      ) : (
-        <p className="text-xs text-slate-400">반을 눌러 해당 경기 결과를 볼 수 있어요.</p>
-      )}
+      ) : null}
       <Button
         type="button"
         variant={showAll ? "primary" : "secondary"}

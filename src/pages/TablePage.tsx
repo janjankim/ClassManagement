@@ -20,7 +20,7 @@ export function TablePage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 pb-16">
-      <AppHeader tournament={data?.tournament ?? {}} updatedAt={data?.updatedAt ?? ""} />
+      <AppHeader tournament={data?.tournament ?? {}} />
       <NavTabs />
 
       {isLoading ? <p className="py-12 text-center text-slate-400">불러오는 중...</p> : null}

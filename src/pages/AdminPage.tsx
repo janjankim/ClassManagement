@@ -44,7 +44,7 @@ export function AdminPage() {
   if (!isAuthenticated) {
     return (
       <div className="mx-auto max-w-3xl px-4 pb-16">
-        <AppHeader tournament={data?.tournament ?? {}} updatedAt={data?.updatedAt ?? ""} />
+        <AppHeader tournament={data?.tournament ?? {}} />
         <NavTabs />
         <PasswordGate onLogin={login} />
       </div>
@@ -83,7 +83,7 @@ export function AdminPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 pb-16">
-      <AppHeader tournament={data?.tournament ?? {}} updatedAt={data?.updatedAt ?? ""} />
+      <AppHeader tournament={data?.tournament ?? {}} />
       <NavTabs />
 
       <div className="mb-4 flex items-center justify-between">
