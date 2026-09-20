@@ -31,9 +31,7 @@ export function StandingsPage() {
                 <th className="px-4 py-3 font-semibold">승</th>
                 <th className="px-4 py-3 font-semibold">무</th>
                 <th className="px-4 py-3 font-semibold">패</th>
-                <th className="px-4 py-3 font-semibold">득점</th>
-                <th className="px-4 py-3 font-semibold">실점</th>
-                <th className="px-4 py-3 font-semibold">득실차</th>
+                <th className="px-4 py-3 font-semibold">세트 득점</th>
               </tr>
             </thead>
             <tbody>
@@ -51,17 +49,13 @@ export function StandingsPage() {
                   <td className="px-4 py-3 text-slate-600">{entry.wins}</td>
                   <td className="px-4 py-3 text-slate-600">{entry.draws}</td>
                   <td className="px-4 py-3 text-slate-600">{entry.losses}</td>
-                  <td className="px-4 py-3 text-slate-600">{entry.setsFor}</td>
-                  <td className="px-4 py-3 text-slate-600">{entry.setsAgainst}</td>
-                  <td className="px-4 py-3 font-semibold text-slate-800">
-                    {entry.setDiff > 0 ? `+${entry.setDiff}` : entry.setDiff}
-                  </td>
+                  <td className="px-4 py-3 font-semibold text-slate-800">{entry.setPoints}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           <p className="px-4 py-3 text-xs text-slate-400">
-            순위 기준: 승 수 → 세트 득실차 → 세트 득점 순. 세트 점수는 경기당 최대 3점입니다.
+            순위 기준: 승 수 → 세트 득점 순. 세트를 이기면 1점이며, 세트를 져도 감점은 없습니다(경기당 최대 3점).
           </p>
         </div>
       ) : null}

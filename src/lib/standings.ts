@@ -7,14 +7,12 @@ export interface TeamStanding {
   wins: number;
   draws: number;
   losses: number;
-  setsFor: number;
-  setsAgainst: number;
-  setDiff: number;
+  setPoints: number;
 }
 
 export function computeStandings(teams: string[], matches: Match[]): TeamStanding[] {
   const stats = new Map<string, Omit<TeamStanding, "rank" | "team">>(
-    teams.map((team) => [team, { played: 0, wins: 0, draws: 0, losses: 0, setsFor: 0, setsAgainst: 0, setDiff: 0 }]),
+    teams.map((team) => [team, { played: 0, wins: 0, draws: 0, losses: 0, setPoints: 0 }]),
   );
 
   matches
@@ -29,10 +27,8 @@ export function computeStandings(teams: string[], matches: Match[]): TeamStandin
 
       statA.played += 1;
       statB.played += 1;
-      statA.setsFor += scoreA;
-      statA.setsAgainst += scoreB;
-      statB.setsFor += scoreB;
-      statB.setsAgainst += scoreA;
+      statA.setPoints += scoreA;
+      statB.setPoints += scoreB;
 
       if (scoreA > scoreB) {
         statA.wins += 1;
@@ -46,12 +42,9 @@ export function computeStandings(teams: string[], matches: Match[]): TeamStandin
       }
     });
 
-  const ranked = teams.map((team) => {
-    const stat = stats.get(team)!;
-    return { team, ...stat, setDiff: stat.setsFor - stat.setsAgainst };
-  });
+  const ranked = teams.map((team) => ({ team, ...stats.get(team)! }));
 
-  ranked.sort((a, b) => b.wins - a.wins || b.setDiff - a.setDiff || b.setsFor - a.setsFor || a.team.localeCompare(b.team));
+  ranked.sort((a, b) => b.wins - a.wins || b.setPoints - a.setPoints || a.team.localeCompare(b.team));
 
   return ranked.map((entry, index) => ({ ...entry, rank: index + 1 }));
 }
