@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-2026 배구 대회 경기 현황 웹앱. React 화면과 API를 Google Apps Script 웹앱 하나로 배포하고, 데이터는 Google Sheets에 저장한다. 요구사항과 결정 사항은 [volleyball-tournament-prd.md](volleyball-tournament-prd.md), 실행 방법은 [README.md](README.md)에 있다.
+2026 배구 대회 경기 현황 웹앱. React 화면과 API를 Google Apps Script 웹앱 하나로 배포하고, 데이터는 Google Sheets에 저장한다. 요구사항과 결정 사항은 [volleyball-tournament-prd.md](volleyball-tournament-prd.md), 실행 방법과 **학생용·교사용 접속 주소**는 [README.md](README.md)에 있다. 사용자가 링크를 물으면 README의 표를 그대로 알려준다. Apps Script 편집기 주소 같은 로컬 전용 링크는 git에 올리지 않는 `.local-notes.md`에 있다.
 
 ## 명령어
 

@@ -1,5 +1,14 @@
 # 2026 배구 대회 경기 현황
 
+## 접속 주소
+
+| 구분 | 주소 |
+|---|---|
+| 학생용 | https://script.google.com/macros/s/AKfycbw4pnPi9DUvtTYng-wTg3hAARER9GJlU5Et8VFiiPFxczmpqoB8LBk08fSAEd1aVaw/exec |
+| 교사(관리자)용 | https://script.google.com/macros/s/AKfycbw4pnPi9DUvtTYng-wTg3hAARER9GJlU5Et8VFiiPFxczmpqoB8LBk08fSAEd1aVaw/exec#/admin |
+
+주소는 배포할 때마다 바뀌지 않는다. 배포 ID를 바꾸면 이 표, `.env.production`, `package.json`의 `deploy:gas`를 함께 고쳐야 한다.
+
 학생용 대진 현황·경기 표·순위와 관리자용 경기 기록 화면을 제공하는 웹앱입니다. React로 화면을 만들고, Google Apps Script 하나로 API 서버 역할과 화면 호스팅을 모두 처리합니다. 데이터 저장소는 Google Sheets입니다. 별도의 프론트엔드 호스팅(Vercel 등)이나 서버가 필요 없습니다.
 
 ```text
